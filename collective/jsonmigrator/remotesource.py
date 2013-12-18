@@ -102,10 +102,11 @@ class Urllibrpc(object):
                 path = path[:-1]
             path = path + '/' + item
             url = urlparse.urlunparse( (scheme,netloc,path,params,query,fragment) )
-            f = urllib.urlopen(url)
+            try:
+                f = urllib.urlopen(url)
+            except Exception, e:
+                raise UrllibrpcException(e.__str__(), url)
             content = f.read()
-            if f.getcode() != 200:
-                raise UrllibrpcException(f.getcode(), f.geturl())
             f.close()
             return content
         return callable
@@ -163,7 +164,7 @@ class RemoteSource(object):
         if path.startswith('/'):
             path = path[1:]
         url = urllib2.urlparse.urljoin(remote_url, urllib.quote(path))
-        #remote = xmlrpclib.Server(
+        # remote = xmlrpclib.Server(
         #         url,
         #         BasicAuth(self.remote_username, self.remote_password),
         #         )
